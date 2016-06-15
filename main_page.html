@@ -1,22 +1,53 @@
+<!-- 
+	NOTES:
+	Map can only appear if:
+	- The container's height and width is set using CSS or from the html style attribute
+	- The center position AND the zoom level is already set
+ -->
+
 <!DOCTYPE html>
 <html>
 	<head>
 		
 
-		<script src="http://maps.googleapis.com/maps/api/js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
 
 		<script type="text/javascript">
-			/* Callback functions! */
 			
-			function initialize() {
-				var mapProp = {
-					center:new google.maps.LatLng(51.508742,-0.120850),
-					zoom:5,
-					mapTypeId:google.maps.MapTypeId.ROADMAP
-				};
-				var map=new google.maps.Map(document.getElementById("map"),mapProp);
+			/* Global variables */
+			var map;
+			var places_service;
+
+			/* Initialize the map */
+			function init() {
+
+				/* Instantiate map */
+				map = new google.maps.Map(
+					document.getElementById("map"), // Map container element
+					null // Map specs; null at first. Will later be set in setLocationByString()
+				);
+
+				/* Instantiate places service */
+				places_service = new google.maps.places.PlacesService(map);
+
+				setLocationByString("Sungai Raya Dalam")
 			}
-			google.maps.event.addDomListener(window, 'load', initialize);
+
+			function setLocationByString(location) {
+				places_service.textSearch(
+					{ query: location }, // Search query
+					function(result, status) {
+						/* Callback function */
+						var position = result[0].geometry.location;
+						map.setCenter(position);
+						map.setZoom(18);
+
+					}
+				);
+			}
+
+			/* Run init() after the page finished loading */
+			window.onload = init;
 
 		</script>
 
