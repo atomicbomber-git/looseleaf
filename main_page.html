@@ -3,20 +3,39 @@
 	<head>
 		
 
-		<script src="http://maps.googleapis.com/maps/api/js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
 
 		<script type="text/javascript">
 			/* Callback functions! */
 			
-			function initialize() {
-				var mapProp = {
-					center:new google.maps.LatLng(51.508742,-0.120850),
-					zoom:5,
-					mapTypeId:google.maps.MapTypeId.ROADMAP
-				};
-				var map=new google.maps.Map(document.getElementById("map"),mapProp);
+			var map;
+
+			function callback(results, status) {
+				if (status == google.maps.places.PlacesServiceStatus.OK) {
+				    for (var i = 0; i < results.length; i++) {
+				      var position = results[i].geometry.location;
+				      map.setCenter(position);
+				      map.setZoom(18)
+				    }
+				}
+
 			}
-			google.maps.event.addDomListener(window, 'load', initialize);
+
+      		function initMap() {
+      			map = new google.maps.Map(document.getElementById('map'), {
+      		    	center: {lat: -34.397, lng: 150.644},
+      		    	zoom: 8
+      		  	});
+
+      		  	var request = {
+      		  		query: "Sungai Raya Dalam"
+      		  	};
+
+      		  	service = new google.maps.places.PlacesService(map);
+      		  	service.textSearch(request, callback);
+      		}
+
+			window.onload = initMap;
 
 		</script>
 
@@ -44,7 +63,7 @@
 				<div class='twelve columns'>
 					
 					<!-- Don't change the style. It will break for no fucking reason at all. -->
-					<div id='map' style="width:640px;height:480px;margin:auto">
+					<div id='map' style="width:640px;height:480px;margin=auto">
 
 					</div>
 
