@@ -114,17 +114,18 @@
 						$.ajax({
 							type: "POST",
 							url: "/add_waypoint",
-							contentType:"application/json",  
 							data: {
 								name: $("#input_name").val(),
 								lat: $("#input_lat").val(),
 								lng: $("#input_lng").val(),
-								description: $("input_desc").val()
+								desc: $("#input_desc").val()
 							},
 
 							/* Callback function */
 							success: function(result) {
 								alert(result);
+
+								$("#records").html(result);
 							}
 
 						});
@@ -165,7 +166,7 @@
 
 								<div class="form-group">
 									<label for="input_desc"> Keterangan: </label>
-									<textarea id="input_desc" name="description" class="form-control" rows="3" required></textarea>
+									<textarea id="input_desc" class="form-control" rows="3" required></textarea>
 								</div>
 
 								<div style='text-align: right'>
@@ -200,15 +201,19 @@
 
 			<div class="row">
 				<div class="col-md-12">
+
+			
+				
+
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<table class="table table-striped">
-								<thead>	<tr>	<th> Nama Lokasi </th>	<th> Posisi Lintang </th>	<th> Posisi Bujur </th>	<th> Kendali </th> </tr>	</thead>
+								<thead>	<tr>	<th> Nama Lokasi </th>	<th> Posisi Lintang </th>	<th> Posisi Bujur </th>	<th> Keterangan </th> </tr>	</thead>
 								
-								<tbody>
-									<tr>	<td> </td> <td> Lorem </td>	<td> Ipsum </td> <td> </td> </tr>
-									<tr>	<td> </td> <td> Lorem </td>	<td> Ipsum </td> <td> </td> </tr>
-									<tr>	<td> </td> <td> Lorem </td>	<td> Ipsum </td> <td> </td> </tr>
+								<tbody id="records">
+									{% for record in records %}
+										<tr>	<td> {{ record[0] }} </td> <td> {{ record[1] }} </td>	<td> {{ record[2] }} </td> <td> {{ record[3] }}  </td>  </tr>
+									{% endfor %}
 								</tbody>
 							</table>
 						</div>
