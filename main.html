@@ -1,0 +1,98 @@
+<!doctype html>
+
+<html lang="en">
+	<meta charset="utf-8">
+	
+	<head>
+		<title> GIS Web App </title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+		
+		<!-- TODO: Move to a separate .css file -->
+		<style>
+			.container {
+				max-width: 600px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+
+			#map-container {
+				margin-right: auto;
+				margin-left: auto;
+				width: 100%px;
+				height: 400px;
+			}
+		</style>
+
+		<!-- Load API from Google Map along with the places library (in the GET request) -->
+		<script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
+
+		<script>
+			/* Global variables */
+			var map;
+			var places_service;
+
+			/* Will be called after the page has been loaded */
+			function init() {
+				/* Initialize map variable */
+				map = new google.maps.Map(
+					document.getElementById("map-container"), /* Container element */
+					{
+						zoom: 16
+					}
+				);
+
+				/* Initialize places service */
+				places_service = new google.maps.places.PlacesService(map);
+
+				setPlaceByString("Sungai Raya Dalam");
+			}
+
+			function setPlaceByString(place_name) {
+				places_service.textSearch(
+					// Request description
+					{	query: place_name	},
+
+					// Callback function
+					function(result, status) {
+						position = result[0].geometry.location;
+						map.setCenter(position);
+					}
+				);
+			}
+
+			window.onload = init;
+		</script>
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<h2> Lorem Ipsum </h2>
+					<p>
+						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+						tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+						quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+						consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+						cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+						proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+					</p>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							PETA SUNGAI RAYA DALAM, KUBU RAYA
+						</div>
+						<div class="panel-body">
+							<!-- Map panel body -->
+							
+							<div id="map-container">
+								<!-- Contains the map loaded using Google Map API -->
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+
+</html>
