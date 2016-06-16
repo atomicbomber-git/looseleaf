@@ -29,6 +29,7 @@ def get_static_resource(static_path):
 
 @app.route('/add_waypoint', method="POST")
 def add_waypoint():
+	# Load data from request body
 	name = request.POST.get("name", "name_error")
 	lat = request.POST.get("lat", "latitude_error")
 	lng = request.POST.get("lng", "longitude_error")
@@ -37,7 +38,7 @@ def add_waypoint():
 	# Store waypoint to database
 	store_waypoint(name, lat, lng, description)
 
-	### Load refreshed table
+	### Load refreshed table body
 	# Create database connection
 	connection = sqlite3.connect("data.sqlite")
 	cursor = connection.cursor()
