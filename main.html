@@ -39,6 +39,9 @@
 		<!-- Load JQuery API! -->
 		<script src="js/jquery-3.0.0.min.js"> </script>
 
+		<!-- JQuery validation plugin -->
+		<script src="js/jquery.validate.js"></script>
+
 		<script>
 			/* Global variables */
 			var map;
@@ -95,7 +98,41 @@
 				);
 			}
 
-			window.onload = init;
+			
+			$(document).ready(function() {
+				/* Initialize Google Map related stuff */
+				init();
+
+				/* Handle events */
+				$("#add_waypoint").click(function(e) {
+					/* Prevent the default action of loading another page when submit button is clicked. */
+					e.preventDefault();
+
+					$("#add_waypoint_form").validate();
+					if ($("#add_waypoint_form").valid()) {
+						/* Send ajax request to webserver */
+						$.ajax({
+							type: "POST",
+							url: "/add_waypoint",
+							contentType:"application/json",  
+							data: {
+								name: $("#input_name").val(),
+								lat: $("#input_lat").val(),
+								lng: $("#input_lng").val(),
+								description: $("input_desc").val()
+							},
+
+							/* Callback function */
+							success: function(result) {
+								alert(result);
+							}
+
+						});
+					}
+
+				});
+			});
+
 		</script>
 	</head>
 
@@ -112,18 +149,27 @@
 							Panel Kendali
 						</div>
 						<div class="panel-body">
-							<form>
+							<form id="add_waypoint_form">
+								<div class="form-group">
+									<label for="input_name"> Nama Lokasi: </label>
+									<input class="form-control" placeholder="Nama lokasi" type="text" id="input_name" required>
+								</div>
 								<div class="form-group">
 									<label for="input_lat"> Garis Bujur: </label>
-									<input class="form-control" placeholder="Posisi garis bujur" type="text" id="input_lat">
+									<input class="form-control" placeholder="Posisi garis bujur" type="text" id="input_lat" required>
 								</div>
 								<div class="form-group">
 									<label for="input_lng"> Garis Lintang: </label>
-									<input class="form-control" placeholder="Posisi garis lintang" type="text" id="input_lng">
+									<input class="form-control" placeholder="Posisi garis lintang" type="text" id="input_lng" required>
+								</div>
+
+								<div class="form-group">
+									<label for="input_desc"> Keterangan: </label>
+									<textarea id="input_desc" name="description" class="form-control" rows="3" required></textarea>
 								</div>
 
 								<div style='text-align: right'>
-									<input class='btn btn-primary' type='submit' value='Simpan Data Lokasi'>
+									<input style="width: 100%" id="add_waypoint" class='btn btn-primary' type='submit' value='Simpan Data Lokasi'>
 								</div>
 							</form>
 
@@ -153,17 +199,19 @@
 			</div>
 
 			<div class="row">
-				<div class="panel panel-default">
-					<div class="panel-body">
-						<table class="table table-striped">
-							<thead>	<tr>	<th> Nama Lokasi </th>	<th> Posisi Lintang </th>	<th> Posisi Bujur </th>	<th> Kendali </th> </tr>	</thead>
-							
-							<tbody>
-								<tr>	<td> </td> <td> Lorem </td>	<td> Ipsum </td> <td> </td> </tr>
-								<tr>	<td> </td> <td> Lorem </td>	<td> Ipsum </td> <td> </td> </tr>
-								<tr>	<td> </td> <td> Lorem </td>	<td> Ipsum </td> <td> </td> </tr>
-							</tbody>
-						</table>
+				<div class="col-md-12">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<table class="table table-striped">
+								<thead>	<tr>	<th> Nama Lokasi </th>	<th> Posisi Lintang </th>	<th> Posisi Bujur </th>	<th> Kendali </th> </tr>	</thead>
+								
+								<tbody>
+									<tr>	<td> </td> <td> Lorem </td>	<td> Ipsum </td> <td> </td> </tr>
+									<tr>	<td> </td> <td> Lorem </td>	<td> Ipsum </td> <td> </td> </tr>
+									<tr>	<td> </td> <td> Lorem </td>	<td> Ipsum </td> <td> </td> </tr>
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
