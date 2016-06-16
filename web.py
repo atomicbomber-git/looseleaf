@@ -11,10 +11,12 @@ def get_content():
 def get_static_resource(static_path):
 	return static_file(static_path, './')
 
-@app.route('/post_data', method="POST")
-def get_form_data():
-	username = request.forms.get('username')
-	password = request.forms.get('password')
-	return "<h3> {0}, {1} </h3>".format(username, password)
+import sqlite3
 
-app.run()
+# Temporary ajax response handlers
+@app.route('/ajax')
+def get_ajax_response():
+	# If return type is dictionary, it will be automatically converted into JSON
+	return { "name": "James", "address": "Nowhere"}
+
+app.run(reload=True)
