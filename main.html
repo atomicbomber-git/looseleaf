@@ -26,10 +26,15 @@
 		<!-- Load API from Google Map along with the places library (in the GET request) -->
 		<script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
 
+		<!-- Load JQuery API! -->
+		<script src="js/jquery-3.0.0.min.js"> </script>
+
 		<script>
 			/* Global variables */
 			var map;
 			var places_service;
+			var mode_input = false;
+			var the_marker;
 
 			/* Will be called after the page has been loaded */
 			function init() {
@@ -37,9 +42,29 @@
 				map = new google.maps.Map(
 					document.getElementById("map-container"), /* Container element */
 					{
-						zoom: 16
+						zoom: 16, disableDefaultUI: true
 					}
 				);
+
+				/* Initialize the marker */
+				the_marker = new google.maps.Marker({map: map});
+
+				/* Handle clicks on map */
+				map.addListener('click', function(e) {
+					
+					the_marker.setPosition(e.latLng);
+
+					/* Set value of inputs in control panel */
+					$('#input_lat').val(
+						e.latLng.lat()
+					);
+
+					$('#input_lng').val(
+						e.latLng.lng()
+					);
+				});
+
+
 
 				/* Initialize places service */
 				places_service = new google.maps.places.PlacesService(map);
@@ -68,19 +93,10 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12">
-					<h2> Lorem Ipsum </h2>
-					<p>
-						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-						tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-						quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-						consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-						cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-						proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-					</p>
+					
+					<h1> Peta Reklame Sungai Raya Dalam, Kab. Kubu Raya </h1>
+					
 					<div class="panel panel-default">
-						<div class="panel-heading">
-							PETA SUNGAI RAYA DALAM, KUBU RAYA
-						</div>
 						<div class="panel-body">
 							<!-- Map panel body -->
 							
@@ -88,6 +104,25 @@
 								<!-- Contains the map loaded using Google Map API -->
 							</div>
 
+						</div>
+					</div>
+
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							Panel Kendali
+						</div>
+						<div class="panel-body">
+							<form>
+								<div class="form-group">
+									<label for="input_lat"> Garis Bujur: </label>
+									<input class="form-control" placeholder="Posisi garis bujur" type="text" id="input_lat">
+								</div>
+								<div class="form-group">
+									<label for="input_lng"> Garis Lintang: </label>
+									<input class="form-control" placeholder="Posisi garis lintang" type="text" id="input_lng">
+								</div>
+								<input class='btn btn-primary' type='submit' value='Simpan Data Lokasi'>
+							</form>
 						</div>
 					</div>
 				</div>
