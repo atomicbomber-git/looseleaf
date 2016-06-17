@@ -49,8 +49,14 @@
 			var mode_input = false;
 			var the_marker;
 
+			/* Load waypoints using the template engine */
+			var waypoints = Array();
+
+			
+
 			/* Will be called after the page has been loaded */
 			function init() {
+
 				/* Initialize map variable */
 				map = new google.maps.Map(
 					document.getElementById("map-container"), /* Container element */
@@ -59,7 +65,17 @@
 					}
 				);
 
-				/* Initialize the marker */
+				/* Initialize markers for waypoints that have already been stored */
+				{% for record in records %}
+					waypoints.push(
+						new google.maps.Marker({
+							map: map,
+							position: new google.maps.LatLng({{ record[1] }}, {{ record[2] }})
+						})
+					);
+				{% endfor %}
+
+				/* Initialize the click marker */
 				the_marker = new google.maps.Marker({map: map});
 
 				/* Handle clicks on map */
