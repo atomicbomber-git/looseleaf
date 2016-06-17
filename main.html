@@ -49,10 +49,8 @@
 			var mode_input = false;
 			var the_marker;
 
-			/* Load waypoints using the template engine */
+			/* Waypoints array; To be loaded later with well, waypoints */
 			var waypoints = Array();
-
-			
 
 			/* Will be called after the page has been loaded */
 			function init() {
@@ -67,12 +65,10 @@
 
 				/* Initialize markers for waypoints that have already been stored */
 				{% for record in records %}
-					waypoints.push(
-						new google.maps.Marker({
-							map: map,
-							position: new google.maps.LatLng({{ record[1] }}, {{ record[2] }})
-						})
-					);
+				waypoints.push({
+					id: {{ record[4] }},
+					marker: new google.maps.Marker({map: map, position: new google.maps.LatLng({{ record[1] }}, {{ record[2] }}) })
+				});
 				{% endfor %}
 
 				/* Initialize the click marker */
@@ -92,7 +88,6 @@
 						e.latLng.lng()
 					);
 				});
-
 
 
 				/* Initialize places service */
@@ -119,7 +114,10 @@
 				/* Initialize Google Map related stuff */
 				init();
 
-				/* Handle events */
+				/* Attach event handlers for table control buttons */
+				attach_event_handlers();
+
+				/* Handle add waypoint form's submit */
 				$("#add_waypoint").click(function(e) {
 					/* Prevent the default action of loading another page when submit button is clicked. */
 					e.preventDefault();
@@ -127,21 +125,46 @@
 					$("#add_waypoint_form").validate();
 					if ($("#add_waypoint_form").valid()) {
 						/* Send ajax request to webserver */
+						var lat_val = $("#input_lat").val();
+						var lng_val = $("#input_lng").val();
 						$.ajax({
 							type: "POST",
 							url: "/add_waypoint",
 							data: {
 								name: $("#input_name").val(),
-								lat: $("#input_lat").val(),
-								lng: $("#input_lng").val(),
+								lat: lat_val,
+								lng: lng_val,
 								desc: $("#input_desc").val()
 							},
 
 							/* Callback function */
 							success: function(result) {
-								alert(result);
+								var last_id;
+								
+								/* Retrieve the last id from the waypoint table */
+								$.ajax({
+									type: "POST",
+									url: "/get_last_id",
+									success: function(result) {
+										last_id = result.id;
+
+										/* $.ajax() is asynchronous, make sure to use last_id only here since the success function
+											is called only after the ajax call has been responded. last_id's value will most likely
+											be undefined in places other than here.
+										*/
+										waypoints.push({
+											id: last_id,
+											marker: new google.maps.Marker({
+												map: map, 
+												position: new google.maps.LatLng(lat_val, lng_val)
+											})
+										});
+
+									}
+								});
 
 								$("#records").html(result);
+								attach_event_handlers();
 							}
 
 						});
@@ -149,6 +172,46 @@
 
 				});
 			});
+
+			/* Table controls are put into separate attacher function so it can be re-attached whenever the table is reloaded, for 
+				example when new entries are put using add_waypoint()
+			*/
+			function attach_event_handlers() {
+				/* Handle click events of the set center buttons (The ones on each row of the waypoint table) */
+				$(".btn-setcenter").click(
+					function(e) {
+						var centerPos = new google.maps.LatLng($(this).data("lat"), $(this).data("lng"));
+						map.setCenter(centerPos);
+					}
+				);
+
+				/* Handle click events of the delete buttons in the waypoint table */
+				$(".btn-delete").click(function(e){
+					var record_id = $(this).data("id");
+
+					/* Send ajax request containing the relevant record id */
+					$.ajax({
+						url: "/delete_waypoint",
+						type: "POST",
+						data: { id: record_id },
+						success: function(result, status) {
+
+							/* Delete waypoint marker */
+							for (var i = 0; i < waypoints.length; i++) {
+
+								/* Delete the relevant marker */
+								if (waypoints[i].id === record_id) {
+									waypoints[i].marker.setMap(null);
+									waypoints[i].marker = null;
+								}
+							}
+
+							$("#records").html(result);
+							attach_event_handlers();
+						}
+					});
+				});
+			}
 
 		</script>
 	</head>
@@ -228,10 +291,9 @@
 								
 								{# id is set becaus tbody's content will be reloaded every time the user add a new waypoint #}
 								<tbody id="records">
-									{% for record in records %}
-										<tr>	<td> {{ record[0] }} </td> <td> {{ record[1] }} </td>	<td> {{ record[2] }} </td> <td> {{ record[3] }}  </td>  </tr>
-									{% endfor %}
+									{% include "waypoint_table.html" %}
 								</tbody>
+								
 							</table>
 						</div>
 					</div>

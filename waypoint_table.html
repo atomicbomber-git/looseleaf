@@ -1,5 +1,12 @@
-{# Test #}
+{# Included by main.html #}
 
 {% for record in records %}
-	<tr> <td> {{ record[0] }} </td> <td> {{ record[1] }} </td>	<td> {{ record[2] }} </td> <td> {{ record[3] }}  </td>  </tr>
+	<tr class="row-waypoint_record">
+		<td> {{ record[0] }} </td>
+		<td> {{ record[1] }} </td>
+		<td> {{ record[2] }} </td>
+		<td> {{ record[3] }} </td>
+		<td> <button data-lat="{{ record[1] }}" data-lng="{{ record[2] }}" class="btn-setcenter btn btn-success"> Arahkan </button> </td>
+		<td> <button data-id="{{ record[4] }}" class="btn btn-delete btn-danger"> Hapus </button> </td>
+	</tr>
 {% endfor %}
