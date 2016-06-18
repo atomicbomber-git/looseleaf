@@ -1,5 +1,10 @@
 <!doctype html>
 
+{# 
+	TODO: Change saved marker icon
+	TODO: Add information balloon feature
+ #}
+
 <html lang="en">
 	<meta charset="utf-8">
 	
@@ -21,6 +26,10 @@
 				margin-right: auto;
 			}
 
+			.container-table {
+				max-width: 1000px;
+			}
+
 			#map-container {
 				margin-right: auto;
 				margin-left: auto;
@@ -31,16 +40,20 @@
 			#cpanel {
 				height: 100%;
 			}
+
 		</style>
 
 		<!-- Load API from Google Map along with the places library (in the GET request) -->
 		<script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
 
-		<!-- Load JQuery API! -->
-		<script src="js/jquery-3.0.0.min.js"> </script>
+		<!-- Load jQuery API! -->
+		<script src="js/jquery-2.2.4.js"></script>
 
-		<!-- JQuery validation plugin -->
+		<!-- jQuery validation plugin -->
 		<script src="js/jquery.validate.js"></script>
+
+		<!-- Bootstrap JS; Must be loaded after jQuery has been loaded -->
+		<script src="js/bootstrap.min.js"></script>
 
 		<script>
 			/* Global variables */
@@ -211,12 +224,42 @@
 						}
 					});
 				});
+
+				/* Handle button edit click; Passing edit data to the modal dialog */
+				$(".btn-edit").click(function(e){
+					$("#modal-input-id").val($(this).data("id"));
+					$("#modal-input-name").val($(this).data("name"));
+					$("#modal-input-lat").val($(this).data("lat"));
+					$("#modal-input-lng").val($(this).data("lng"));
+					$("#modal-input-desc").val($(this).data("desc"));
+				});
+
+				/* Handle modal dialog submit button*/
+				$("#modal-submit").click(function(e) {
+					$("#modal-edit-form").validate();
+					if ($("#modal-edit-form").valid()) {
+						
+						$.ajax({
+							type: "POST",
+							url: "/edit_waypoint",
+							data: $("#modal-edit-form").serialize(),
+							success: function(result) {
+								$("#records").html(result);
+								attach_event_handlers();
+							}
+						});
+
+						$("#modal-edit").modal("hide");
+					}
+				});
 			}
 
 		</script>
 	</head>
 
 	<body>
+		{% include "edit_modal_dialog.html" %}
+
 		<div class="container">
 
 			<h1 id="title"> Peta Reklame Sungai Raya Dalam </h1>
@@ -278,16 +321,16 @@
 				</div>
 			</div>
 
+			
+		</div>
+
+		<div class="container container-table">
 			<div class="row">
 				<div class="col-md-12">
-
-			
-				
-
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<table class="table table-striped">
-								<thead>	<tr>	<th> Nama Lokasi </th>	<th> Posisi Lintang </th>	<th> Posisi Bujur </th>	<th> Keterangan </th> </tr>	</thead>
+								<thead>	<tr>	<th> Nama Lokasi </th>	<th> Posisi Lintang </th>	<th> Posisi Bujur </th>	<th> Keterangan </th> <th> Kendali </th> </tr>	</thead>
 								
 								{# id is set becaus tbody's content will be reloaded every time the user add a new waypoint #}
 								<tbody id="records">

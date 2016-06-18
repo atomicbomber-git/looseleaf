@@ -6,7 +6,10 @@
 		<td> {{ record[1] }} </td>
 		<td> {{ record[2] }} </td>
 		<td> {{ record[3] }} </td>
-		<td> <button data-lat="{{ record[1] }}" data-lng="{{ record[2] }}" class="btn-setcenter btn btn-success"> Arahkan </button> </td>
-		<td> <button data-id="{{ record[4] }}" class="btn btn-delete btn-danger"> Hapus </button> </td>
+		<td> 
+			<button data-lat="{{ record[1] }}" data-lng="{{ record[2] }}" class="btn-setcenter btn btn-success btn-sm"> Arahkan </button>
+			<button data-toggle="modal" data-target="#modal-edit" data-id="{{ record[4] }}" data-name="{{ record[0] }}" data-lat="{{ record[1] }}" data-lng="{{ record[2] }}" data-desc="{{ record[3] }}" class="btn btn-edit btn-primary btn-sm"> Sunting </button>
+			<button data-id="{{ record[4] }}" class="btn btn-delete btn-danger btn-sm"> Hapus </button>
+		</td>
 	</tr>
 {% endfor %}

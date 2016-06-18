@@ -72,6 +72,24 @@ def get_last_insert_id():
 	cursor.execute("SELECT MAX(id) FROM waypoints")
 	id = cursor.fetchone()[0]
 	return {"id": id}
+
+@app.route('/edit_waypoint', method='POST')
+def edit_waypoint():
+	_id = request.forms.get("modal-input-id")
+	name = request.forms.get("modal-input-name") 
+	lat = request.forms.get("modal-input-lat")
+	lng = request.forms.get("modal-input-lng")
+	desc = request.forms.get("modal-input-desc")
+
+	update_waypoint(_id, name, lat, lng, desc)
+
+	### Load refreshed table body
+	data = get_waypoint_data()
+
+	# Load and render template
+	template = env.get_template("waypoint_table.html")
+
+	return template.render(records=data)
 	
 ### Helper methods
 def store_waypoint(name, lat, lng, description):
@@ -88,6 +106,14 @@ def get_waypoint_data():
 	cursor = connection.cursor()
 	cursor.execute("SELECT name, latitude, longitude, description, id FROM waypoints")
 	return cursor.fetchall()
+
+def update_waypoint(_id, name, latitude, longitude, description):
+	connection = sqlite3.connect("data.sqlite")
+	cursor = connection.cursor()
+	query = "UPDATE waypoints SET name = '{}', latitude = {}, longitude = {}, description = '{}' WHERE id = {}".format(name, latitude, longitude, description, _id)
+	cursor.execute(query)
+	connection.commit()
+
 
 
 app.run(reload=True)

@@ -1,0 +1,41 @@
+<div id="modal-edit" class="modal fade" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<button class="close" data-dismiss="modal"> <span>&times;</span> </button>
+				<h4 class="modal-title"> Sunting Lokasi </h4>
+			</div> <!-- .modal-header -->
+
+			<div class="modal-body">
+				<form id="modal-edit-form">
+
+				<input type="hidden" name="modal-input-id" id="modal-input-id">
+
+					<div class="form-group">
+						<label for="modal-input-name"> Nama Lokasi: </label>
+						<input placeholder="Nama lokasi" class="form-control" type="text" id="modal-input-name" name="modal-input-name" required>
+					</div>
+					<div class="form-group">
+						<label for="modal-input-lat"> Garis Bujur: </label>
+						<input placeholder="Posisi garis bujur" class="form-control" type="text" id="modal-input-lat" name="modal-input-lat" required>
+					</div>
+					<div class="form-group">
+						<label for="modal-input-lng"> Garis Lintang: </label>
+						<input placeholder="Posisi garis lintang" class="form-control" type="text" id="modal-input-lng" name="modal-input-lng" required>
+					</div>
+					<div class="form-group">
+						<label for="modal-input-desc"> Keterangan: </label>
+						<textarea placeholder="Keterangan mengenai tempat" class="form-control" rows="3" type="text" id="modal-input-desc" name="modal-input-desc" required></textarea>
+					</div>
+				</form>
+			</div> <!-- .modal-body -->
+
+			<div class="modal-footer">
+				<button class="btn btn-danger" data-dismiss="modal"> Batal </button>
+				<button id="modal-submit" class="btn btn-primary"> Simpan </button>
+			</div> <!-- .modal-footer -->
+
+		</div> <!-- .modal-content -->
+	</div> <!-- .modal-dialog -->
+</div> <!-- .modal -->
