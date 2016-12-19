@@ -1,348 +1,372 @@
-<!doctype html>
-
-{# 
-	TODO: Change saved marker icon
-	TODO: Add information balloon feature
- #}
+<!doctype html> {# TODO: Change saved marker icon TODO: Add information balloon feature #}
 
 <html lang="en">
-	<meta charset="utf-8">
-	
-	<head>
-		<title> GIS Web App </title>
-		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-		
-		<!-- TODO: Move to a separate .css file -->
-		<style>
-			#title {
-				text-align: center;
-				height: 100px;
-				line-height: 100px;
-			}
+<meta charset="utf-8">
 
-			.container {
-				max-width: 800px;
-				margin-left: auto;
-				margin-right: auto;
-			}
+<head>
+    <title> GIS Web App </title>
+    <link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css">
 
-			.container-table {
-				max-width: 1000px;
-			}
+    <!-- TODO: Move to a separate .css file -->
+    <style>
+        #title {
+            text-align: center;
+            height: 100px;
+            line-height: 100px;
+        }
 
-			#map-container {
-				margin-right: auto;
-				margin-left: auto;
-				width: 640%px;
-				height: 480px;
-			}
+        .container {
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-			#cpanel {
-				height: 100%;
-			}
+        .container-table {
+            max-width: 1000px;
+        }
 
-		</style>
+        #map-container {
+            margin-right: auto;
+            margin-left: auto;
+            width: 640%px;
+            height: 480px;
+        }
 
-		<!-- Load API from Google Map along with the places library (in the GET request) -->
-		<script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
+        #cpanel {
+            height: 100%;
+        }
+    </style>
 
-		<!-- Load jQuery API! -->
-		<script src="js/jquery-2.2.4.js"></script>
+    <!-- Load API from Google Map along with the places library (in the GET request) -->
+    <script src="http://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyCUkgZsjHQ3JG0RwCjnfl2MD2HMKo_Lmww"></script>
 
-		<!-- jQuery validation plugin -->
-		<script src="js/jquery.validate.js"></script>
+    <!-- Load jQuery API! -->
+    <script src="./js/jquery-3.0.0.min.js"></script>
 
-		<!-- Bootstrap JS; Must be loaded after jQuery has been loaded -->
-		<script src="js/bootstrap.min.js"></script>
+    <!-- jQuery validation plugin -->
+    <script src="./js/jquery.validate.js"></script>
 
-		<script>
-			/* Global variables */
-			var map;
-			var places_service;
-			var mode_input = false;
-			var the_marker;
+    <!-- Bootstrap JS; Must be loaded after jQuery has been loaded -->
+    <script src="./js/bootstrap.js"></script>
 
-			/* Waypoints array; To be loaded later with well, waypoints */
-			var waypoints = Array();
+    <script>
+        /* Global variables */
+        var map;
+        var places_service;
+        var mode_input = false;
+        var the_marker;
 
-			/* Will be called after the page has been loaded */
-			function init() {
+        /* Waypoints array; To be loaded later with well, waypoints */
+        var waypoints = Array();
 
-				/* Initialize map variable */
-				map = new google.maps.Map(
-					document.getElementById("map-container"), /* Container element */
-					{
-						zoom: 16, disableDefaultUI: true
-					}
-				);
+        /* Will be called after the page has been loaded */
+        function init() {
 
-				/* Initialize markers for waypoints that have already been stored */
-				{% for record in records %}
-				waypoints.push({
-					id: {{ record[4] }},
-					marker: new google.maps.Marker({map: map, position: new google.maps.LatLng({{ record[1] }}, {{ record[2] }}) })
-				});
-				{% endfor %}
+            /* Initialize map variable */
+            map = new google.maps.Map(
+                document.getElementById("map-container"), /* Container element */ {
+                    zoom: 16,
+                    disableDefaultUI: true
+                }
+            );
 
-				/* Initialize the click marker */
-				the_marker = new google.maps.Marker({map: map});
+            /* Initialize markers for waypoints that have already been stored */
+            { %
+                for record in records %
+            }
+            waypoints.push({
+                id: {
+                    {
+                        record[4]
+                    }
+                },
+                marker: new google.maps.Marker({
+                    map: map,
+                    position: new google.maps.LatLng({
+                        {
+                            record[1]
+                        }
+                    }, {
+                        {
+                            record[2]
+                        }
+                    })
+                })
+            }); { % endfor %
+            }
 
-				/* Handle clicks on map */
-				map.addListener('click', function(e) {
-					
-					the_marker.setPosition(e.latLng);
+            /* Initialize the click marker */
+            the_marker = new google.maps.Marker({
+                map: map
+            });
 
-					/* Set value of inputs in control panel */
-					$('#input_lat').val(
-						e.latLng.lat()
-					);
+            /* Handle clicks on map */
+            map.addListener('click', function(e) {
 
-					$('#input_lng').val(
-						e.latLng.lng()
-					);
-				});
+                the_marker.setPosition(e.latLng);
 
+                /* Set value of inputs in control panel */
+                $('#input_lat').val(
+                    e.latLng.lat()
+                );
 
-				/* Initialize places service */
-				places_service = new google.maps.places.PlacesService(map);
-
-				setPlaceByString("Sungai Raya Dalam");
-			}
-
-			function setPlaceByString(place_name) {
-				places_service.textSearch(
-					// Request description
-					{	query: place_name	},
-
-					// Callback function
-					function(result, status) {
-						position = result[0].geometry.location;
-						map.setCenter(position);
-					}
-				);
-			}
-
-			
-			$(document).ready(function() {
-				/* Initialize Google Map related stuff */
-				init();
-
-				/* Attach event handlers for table control buttons */
-				attach_event_handlers();
-
-				/* Handle add waypoint form's submit */
-				$("#add_waypoint").click(function(e) {
-					/* Prevent the default action of loading another page when submit button is clicked. */
-					e.preventDefault();
-
-					$("#add_waypoint_form").validate();
-					if ($("#add_waypoint_form").valid()) {
-						/* Send ajax request to webserver */
-						var lat_val = $("#input_lat").val();
-						var lng_val = $("#input_lng").val();
-						$.ajax({
-							type: "POST",
-							url: "/add_waypoint",
-							data: {
-								name: $("#input_name").val(),
-								lat: lat_val,
-								lng: lng_val,
-								desc: $("#input_desc").val()
-							},
-
-							/* Callback function */
-							success: function(result) {
-								var last_id;
-								
-								/* Retrieve the last id from the waypoint table */
-								$.ajax({
-									type: "POST",
-									url: "/get_last_id",
-									success: function(result) {
-										last_id = result.id;
-
-										/* $.ajax() is asynchronous, make sure to use last_id only here since the success function
-											is called only after the ajax call has been responded. last_id's value will most likely
-											be undefined in places other than here.
-										*/
-										waypoints.push({
-											id: last_id,
-											marker: new google.maps.Marker({
-												map: map, 
-												position: new google.maps.LatLng(lat_val, lng_val)
-											})
-										});
-
-									}
-								});
-
-								$("#records").html(result);
-								attach_event_handlers();
-							}
-
-						});
-					}
-
-				});
-			});
-
-			/* Table controls are put into separate attacher function so it can be re-attached whenever the table is reloaded, for 
-				example when new entries are put using add_waypoint()
-			*/
-			function attach_event_handlers() {
-				/* Handle click events of the set center buttons (The ones on each row of the waypoint table) */
-				$(".btn-setcenter").click(
-					function(e) {
-						var centerPos = new google.maps.LatLng($(this).data("lat"), $(this).data("lng"));
-						map.setCenter(centerPos);
-					}
-				);
-
-				/* Handle click events of the delete buttons in the waypoint table */
-				$(".btn-delete").click(function(e){
-					var record_id = $(this).data("id");
-
-					/* Send ajax request containing the relevant record id */
-					$.ajax({
-						url: "/delete_waypoint",
-						type: "POST",
-						data: { id: record_id },
-						success: function(result, status) {
-
-							/* Delete waypoint marker */
-							for (var i = 0; i < waypoints.length; i++) {
-
-								/* Delete the relevant marker */
-								if (waypoints[i].id === record_id) {
-									waypoints[i].marker.setMap(null);
-									waypoints[i].marker = null;
-								}
-							}
-
-							$("#records").html(result);
-							attach_event_handlers();
-						}
-					});
-				});
-
-				/* Handle button edit click; Passing edit data to the modal dialog */
-				$(".btn-edit").click(function(e){
-					$("#modal-input-id").val($(this).data("id"));
-					$("#modal-input-name").val($(this).data("name"));
-					$("#modal-input-lat").val($(this).data("lat"));
-					$("#modal-input-lng").val($(this).data("lng"));
-					$("#modal-input-desc").val($(this).data("desc"));
-				});
-
-				/* Handle modal dialog submit button*/
-				$("#modal-submit").click(function(e) {
-					$("#modal-edit-form").validate();
-					if ($("#modal-edit-form").valid()) {
-						
-						$.ajax({
-							type: "POST",
-							url: "/edit_waypoint",
-							data: $("#modal-edit-form").serialize(),
-							success: function(result) {
-								$("#records").html(result);
-								attach_event_handlers();
-							}
-						});
-
-						$("#modal-edit").modal("hide");
-					}
-				});
-			}
-
-		</script>
-	</head>
-
-	<body>
-		{% include "edit_modal_dialog.html" %}
-
-		<div class="container">
-
-			<h1 id="title"> Peta Reklame Sungai Raya Dalam </h1>
-
-			<div class="row">
-
-				<div class="col-md-4" id="cpanel">
-					<div class="panel panel-default">
-						<div class="panel-heading">
-							Panel Kendali
-						</div>
-						<div class="panel-body">
-							<form id="add_waypoint_form">
-								<div class="form-group">
-									<label for="input_name"> Nama Lokasi: </label>
-									<input class="form-control" placeholder="Nama lokasi" type="text" id="input_name" required>
-								</div>
-								<div class="form-group">
-									<label for="input_lat"> Garis Bujur: </label>
-									<input class="form-control" placeholder="Posisi garis bujur" type="text" id="input_lat" required>
-								</div>
-								<div class="form-group">
-									<label for="input_lng"> Garis Lintang: </label>
-									<input class="form-control" placeholder="Posisi garis lintang" type="text" id="input_lng" required>
-								</div>
-
-								<div class="form-group">
-									<label for="input_desc"> Keterangan: </label>
-									<textarea id="input_desc" class="form-control" rows="3" required></textarea>
-								</div>
-
-								<div style='text-align: right'>
-									<input style="width: 100%" id="add_waypoint" class='btn btn-primary' type='submit' value='Simpan Data Lokasi'>
-								</div>
-							</form>
-
-							<div style='display: block;'>
-								<hr>
-							</div>
+                $('#input_lng').val(
+                    e.latLng.lng()
+                );
+            });
 
 
-						</div>
-					</div>
-				</div>
+            /* Initialize places service */
+            places_service = new google.maps.places.PlacesService(map);
 
-				<div class="col-md-8">	
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<!-- Map panel body -->
-							
-							<div id="map-container">
-								<!-- Contains the map loaded using Google Map API -->
-							</div>
+            setPlaceByString("Sungai Raya Dalam");
+        }
 
-						</div>
-					</div>
+        function setPlaceByString(place_name) {
+            places_service.textSearch(
+                // Request description
+                {
+                    query: place_name
+                },
 
-					
-				</div>
-			</div>
+                // Callback function
+                function(result, status) {
+                    position = result[0].geometry.location;
+                    map.setCenter(position);
+                }
+            );
+        }
 
-			
-		</div>
 
-		<div class="container container-table">
-			<div class="row">
-				<div class="col-md-12">
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<table class="table table-striped">
-								<thead>	<tr>	<th> Nama Lokasi </th>	<th> Posisi Lintang </th>	<th> Posisi Bujur </th>	<th> Keterangan </th> <th> Kendali </th> </tr>	</thead>
-								
-								{# id is set becaus tbody's content will be reloaded every time the user add a new waypoint #}
-								<tbody id="records">
-									{% include "waypoint_table.html" %}
-								</tbody>
-								
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</body>
+        $(document).ready(function() {
+            /* Initialize Google Map related stuff */
+            init();
+
+            /* Attach event handlers for table control buttons */
+            attach_event_handlers();
+
+            /* Handle add waypoint form's submit */
+            $("#add_waypoint").click(function(e) {
+                /* Prevent the default action of loading another page when submit button is clicked. */
+                e.preventDefault();
+
+                $("#add_waypoint_form").validate();
+                if ($("#add_waypoint_form").valid()) {
+                    /* Send ajax request to webserver */
+                    var lat_val = $("#input_lat").val();
+                    var lng_val = $("#input_lng").val();
+                    $.ajax({
+                        type: "POST",
+                        url: "/add_waypoint",
+                        data: {
+                            name: $("#input_name").val(),
+                            lat: lat_val,
+                            lng: lng_val,
+                            desc: $("#input_desc").val()
+                        },
+
+                        /* Callback function */
+                        success: function(result) {
+                            var last_id;
+
+                            /* Retrieve the last id from the waypoint table */
+                            $.ajax({
+                                type: "POST",
+                                url: "/get_last_id",
+                                success: function(result) {
+                                    last_id = result.id;
+
+                                    /* $.ajax() is asynchronous, make sure to use last_id only here since the success function
+                                    	is called only after the ajax call has been responded. last_id's value will most likely
+                                    	be undefined in places other than here.
+                                    */
+                                    waypoints.push({
+                                        id: last_id,
+                                        marker: new google.maps.Marker({
+                                            map: map,
+                                            position: new google.maps.LatLng(lat_val, lng_val)
+                                        })
+                                    });
+
+                                }
+                            });
+
+                            $("#records").html(result);
+                            attach_event_handlers();
+                        }
+
+                    });
+                }
+
+            });
+        });
+
+        /* Table controls are put into separate attacher function so it can be re-attached whenever the table is reloaded, for
+        	example when new entries are put using add_waypoint()
+        */
+        function attach_event_handlers() {
+            /* Handle click events of the set center buttons (The ones on each row of the waypoint table) */
+            $(".btn-setcenter").click(
+                function(e) {
+                    var centerPos = new google.maps.LatLng($(this).data("lat"), $(this).data("lng"));
+                    map.setCenter(centerPos);
+                }
+            );
+
+            /* Handle click events of the delete buttons in the waypoint table */
+            $(".btn-delete").click(function(e) {
+                var record_id = $(this).data("id");
+
+                /* Send ajax request containing the relevant record id */
+                $.ajax({
+                    url: "/delete_waypoint",
+                    type: "POST",
+                    data: {
+                        id: record_id
+                    },
+                    success: function(result, status) {
+
+                        /* Delete waypoint marker */
+                        for (var i = 0; i < waypoints.length; i++) {
+
+                            /* Delete the relevant marker */
+                            if (waypoints[i].id === record_id) {
+                                waypoints[i].marker.setMap(null);
+                                waypoints[i].marker = null;
+                            }
+                        }
+
+                        $("#records").html(result);
+                        attach_event_handlers();
+                    }
+                });
+            });
+
+            /* Handle button edit click; Passing edit data to the modal dialog */
+            $(".btn-edit").click(function(e) {
+                $("#modal-input-id").val($(this).data("id"));
+                $("#modal-input-name").val($(this).data("name"));
+                $("#modal-input-lat").val($(this).data("lat"));
+                $("#modal-input-lng").val($(this).data("lng"));
+                $("#modal-input-desc").val($(this).data("desc"));
+            });
+
+            /* Handle modal dialog submit button*/
+            $("#modal-submit").click(function(e) {
+                $("#modal-edit-form").validate();
+                if ($("#modal-edit-form").valid()) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/edit_waypoint",
+                        data: $("#modal-edit-form").serialize(),
+                        success: function(result) {
+                            $("#records").html(result);
+                            attach_event_handlers();
+                        }
+                    });
+
+                    $("#modal-edit").modal("hide");
+                }
+            });
+        }
+    </script>
+</head>
+
+<body>
+    {% include "edit_modal_dialog.html" %}
+
+    <div class="container">
+
+        <h1 id="title"> Peta Persebaran Toko Komputer Pontianak </h1>
+
+        <div class="row">
+
+            <div class="col-md-4" id="cpanel">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Panel Kendali
+                    </div>
+                    <div class="panel-body">
+                        <form id="add_waypoint_form">
+                            <div class="form-group">
+                                <label for="input_name"> Nama Lokasi: </label>
+                                <input class="form-control" placeholder="Nama lokasi" type="text" id="input_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="input_lat"> Garis Bujur: </label>
+                                <input class="form-control" placeholder="Posisi garis bujur" type="text" id="input_lat" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="input_lng"> Garis Lintang: </label>
+                                <input class="form-control" placeholder="Posisi garis lintang" type="text" id="input_lng" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="input_desc"> Keterangan: </label>
+                                <textarea id="input_desc" class="form-control" rows="3" required></textarea>
+                            </div>
+
+                            <div style="text-align: right">
+                                <input style="width: 100%" id="add_waypoint" class="btn btn-primary" type="submit" value="Simpan Data Lokasi">
+                            </div>
+                        </form>
+
+                        <div style="display: block;">
+                            <hr>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <!-- Map panel body -->
+
+                        <div id="map-container">
+                            <!-- Contains the map loaded using Google Map API -->
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="container container-table">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th> Nama Lokasi </th>
+                                    <th> Posisi Lintang </th>
+                                    <th> Posisi Bujur </th>
+                                    <th> Keterangan </th>
+                                    <th> Kendali </th>
+                                </tr>
+                            </thead>
+
+                            {# id is set becaus tbody's content will be reloaded every time the user add a new waypoint #}
+                            <tbody id="records">
+                                {% include "waypoint_table.html" %}
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
 
 </html>
